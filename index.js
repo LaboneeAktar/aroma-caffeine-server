@@ -29,13 +29,13 @@ async function run() {
     const coffeeCollection = client.db("coffeeDB").collection("coffee");
 
     // Get all coffee data
-    app.get("/coffee", async (req, res) => {
+    app.get("/coffees", async (req, res) => {
       const allCoffee = await coffeeCollection.find({}).toArray();
       res.send(allCoffee);
     });
 
     //Get single coffee
-    app.get("/coffee/:id", async (req, res) => {
+    app.get("/coffees/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await coffeeCollection.findOne(query);
@@ -43,7 +43,7 @@ async function run() {
     });
 
     //Post coffee data
-    app.post("/coffee", async (req, res) => {
+    app.post("/coffees", async (req, res) => {
       const newCoffee = req.body;
       // console.log(newCoffee);
       const result = await coffeeCollection.insertOne(newCoffee);
@@ -51,8 +51,30 @@ async function run() {
       res.send(result);
     });
 
+    //Update Coffee data
+    app.put("/coffees/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateCoffee = req.body;
+      const coffee = {
+        $set: {
+          name: updateCoffee.name,
+          chef: updateCoffee.chef,
+          supplier: updateCoffee.supplier,
+          taste: updateCoffee.taste,
+          category: updateCoffee.category,
+          details: updateCoffee.details,
+          price: updateCoffee.price,
+          photo: updateCoffee.photo,
+        },
+      };
+      const result = await coffeeCollection.updateOne(filter, coffee, options);
+      res.send(result);
+    });
+
     //Delete Coffee from database
-    app.delete("/coffee/:id", async (req, res) => {
+    app.delete("/coffees/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await coffeeCollection.deleteOne(query);
